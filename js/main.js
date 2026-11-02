@@ -3,9 +3,20 @@
 const $=id=>document.getElementById(id),R=Math.random;
 /* ---------- SaveManager ---------- */
 const S={d:{best:0,coins:0,dist:0,chars:[0],char:0,music:true,sfx:true,vol:.6},
- load(){try{const bin=atob(MUSIC_B64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
-  const e=new Audio(URL.createObjectURL(new Blob([u],{type:'audio/mpeg'})));e.loop=true;e.preload='auto';this.el=e;this.vol();if(this.on)this.play()}
-  catch(err){this.fail=true;banner('Music load nahi hui');if(this.on)this.play()}},
+ load(){try{Object.assign(this.d,JSON.parse(localStorage.getItem('spr1')||'{}'))}catch(e){}},
+ save(){try{localStorage.setItem('spr1',JSON.stringify(this.d))}catch(e){}}};
+S.load();
+const CHARS=[{n:'Mehran',t:0,k:'#f1f5f9',cost:0},{n:'Rickshaw Raja',t:1,k:'#f59e0b',cost:150},{n:'Truck Art Bedford',t:2,k:'#d62828',cost:400}];
+const MSG=["Welcome to Sindh — Poles Included!","Road Complete, Poles Pending","Drive Carefully — Pole Ahead","Development Under Construction","Electricity Pole Expressway","Please Dodge Responsibly","Road Ka Budget Khatam, Pole Ka Nahi","Aagay Pole Hai, Sambhal Kar!","Congratulations! You Found Another Pole!","Road Bani, Pole Nahi Hata!"];
+const DIE=["Pole Se Takra Gaye!","Development Ne Rok Diya!","Pole Abhi Bhi Wahin Hai!","Road Ka Kya Kasoor?","Mission Failed — Pole Wins!"];
+const PU=[['S','#22d3ee'],['M','#ef4444'],['2x','#a855f7'],['J','#22c55e'],['⚡','#f97316']];
+const SHOPS=['CHAI','PAAN','DHABA','TYRES','MOBILE'],SCOL=['#e76f51','#2a9d8f','#e9c46a','#8ecae6','#b5838d'];
+const BIL=['POLE INCLUDED','NO ROAD, YES POLE','DEVELOPMENT™','WELCOME TO SINDH'];
+
+/* ---------- AudioManager (synth placeholder; optional assets/audio/music.mp3) ---------- */
+const A={ctx:null,mg:null,el:null,on:false,step:0,nt:0,tm:null,idx:3,
+ fail:false,
+ load(){fetch('assets/audio/music.mp3').then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>{const e=new Audio(URL.createObjectURL(b));e.loop=true;e.preload='auto';this.el=e;this.vol();if(this.on)this.play()}).catch(()=>{this.fail=true;if(this.on)this.play()})},
  init(){if(this.ctx)return;try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();this.mg=this.ctx.createGain();this.mg.connect(this.ctx.destination);this.vol()}catch(e){}},
  vol(){if(this.mg)this.mg.gain.value=S.d.music?S.d.vol*.5:0;if(this.el){this.el.volume=S.d.vol;if(!S.d.music)this.el.pause();else if(this.on&&this.el.paused)this.el.play().catch(()=>{})}},
  n(f,t,d,type,v,dest){const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(dest||this.mg);o.start(t);o.stop(t+d+.02)},
