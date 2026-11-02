@@ -1,10 +1,10 @@
-name: Extract Sindh Pole Runner zip
+name: Extract zip to repo root
 
 on:
   workflow_dispatch:
   push:
     paths:
-      - 'sindh-pole-runner (3).zip'
+      - '*.zip'
 
 permissions:
   contents: write
@@ -15,16 +15,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Unzip into repo root
+      - name: Unzip every root zip into repo root
+        shell: bash
         run: |
-          unzip -q -o sindh-pole-runner.zip -d _tmp
-          cp -a _tmp/sindh-pole-runner/. .
-          rm -rf _tmp sindh-pole-runner.zip
+          shopt -s nullglob
+          zips=(./*.zip)
+          if [ ${#zips[@]} -eq 0 ]; then echo "No zip found"; exit 0; fi
+          for z in "${zips[@]}"; do
+            rm -rf _tmp && mkdir _tmp
+            unzip -q -o "$z" -d _tmp
+            # agar zip ke andar sirf ek folder hai to uske andar ka content root mein copy karo
+            if [ "$(ls -A _tmp | wc -l)" -eq 1 ] && [ -d "_tmp/$(ls -A _tmp)" ]; then
+              cp -a "_tmp/$(ls -A _tmp)/." .
+            else
+              cp -a _tmp/. .
+            fi
+            rm -rf _tmp "$z"
+          done
 
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add -A
-          git diff --cached --quiet || git commit -m "Extract Sindh Pole Runner to repo root"
+          git diff --cached --quiet || git commit -m "Extract zip to repo root"
           git push
