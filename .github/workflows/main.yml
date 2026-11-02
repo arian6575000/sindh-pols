@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'sindh-pole-runner.zip'
+      - 'sindh-pole-runner (3).zip'
 
 permissions:
   contents: write
