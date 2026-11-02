@@ -3,20 +3,9 @@
 const $=id=>document.getElementById(id),R=Math.random;
 /* ---------- SaveManager ---------- */
 const S={d:{best:0,coins:0,dist:0,chars:[0],char:0,music:true,sfx:true,vol:.6},
- load(){try{Object.assign(this.d,JSON.parse(localStorage.getItem('spr1')||'{}'))}catch(e){}},
- save(){try{localStorage.setItem('spr1',JSON.stringify(this.d))}catch(e){}}};
-S.load();
-const CHARS=[{n:'Mehran',t:0,k:'#f1f5f9',cost:0},{n:'Rickshaw Raja',t:1,k:'#f59e0b',cost:150},{n:'Truck Art Bedford',t:2,k:'#d62828',cost:400}];
-const MSG=["Welcome to Sindh — Poles Included!","Road Complete, Poles Pending","Drive Carefully — Pole Ahead","Development Under Construction","Electricity Pole Expressway","Please Dodge Responsibly","Road Ka Budget Khatam, Pole Ka Nahi","Aagay Pole Hai, Sambhal Kar!","Congratulations! You Found Another Pole!","Road Bani, Pole Nahi Hata!"];
-const DIE=["Pole Se Takra Gaye!","Development Ne Rok Diya!","Pole Abhi Bhi Wahin Hai!","Road Ka Kya Kasoor?","Mission Failed — Pole Wins!"];
-const PU=[['S','#22d3ee'],['M','#ef4444'],['2x','#a855f7'],['J','#22c55e'],['⚡','#f97316']];
-const SHOPS=['CHAI','PAAN','DHABA','TYRES','MOBILE'],SCOL=['#e76f51','#2a9d8f','#e9c46a','#8ecae6','#b5838d'];
-const BIL=['POLE INCLUDED','NO ROAD, YES POLE','DEVELOPMENT™','WELCOME TO SINDH'];
-
-/* ---------- AudioManager (synth placeholder; optional assets/audio/music.mp3) ---------- */
-const A={ctx:null,mg:null,el:null,on:false,step:0,nt:0,tm:null,idx:3,
- fail:false,
- load(){fetch('assets/audio/music.mp3').then(r=>{if(!r.ok)throw 0;return r.blob()}).then(b=>{const e=new Audio(URL.createObjectURL(b));e.loop=true;e.preload='auto';this.el=e;this.vol();if(this.on)this.play()}).catch(()=>{this.fail=true;if(this.on)this.play()})},
+ load(){try{const bin=atob(MUSIC_B64),u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+  const e=new Audio(URL.createObjectURL(new Blob([u],{type:'audio/mpeg'})));e.loop=true;e.preload='auto';this.el=e;this.vol();if(this.on)this.play()}
+  catch(err){this.fail=true;banner('Music load nahi hui');if(this.on)this.play()}},
  init(){if(this.ctx)return;try{this.ctx=new(window.AudioContext||window.webkitAudioContext)();this.mg=this.ctx.createGain();this.mg.connect(this.ctx.destination);this.vol()}catch(e){}},
  vol(){if(this.mg)this.mg.gain.value=S.d.music?S.d.vol*.5:0;if(this.el){this.el.volume=S.d.vol;if(!S.d.music)this.el.pause();else if(this.on&&this.el.paused)this.el.play().catch(()=>{})}},
  n(f,t,d,type,v,dest){const o=this.ctx.createOscillator(),g=this.ctx.createGain();o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(dest||this.mg);o.start(t);o.stop(t+d+.02)},
@@ -63,10 +52,18 @@ function row(){const z=FAR,s=g.safe=Math.max(-1,Math.min(1,g.safe+(R()<.6?(R()<.
  if(R()<.07)add('pu',s,z+10,{v:R()*5|0})}
 
 /* ---------- Player + update ---------- */
-function jump(){if(g.py<=.01&&g.vy<=0){g.vy=14;g.py=.02;A.sfx('jump')}else if(g.ej>0){g.ej--;g.vy=13;A.sfx('pow')}}
-function swipe(d){if(g.st!=='play'||g.dead>0)return;if(navigator.vibrate&&d!=='d')navigator.vibrate(12);if(d==='l')g.lane=Math.max(-1,g.lane-1);else if(d==='r')g.lane=Math.min(1,g.lane+1);
- else if(d==='u')jump();else if(g.py<=0)g.slide=.7;else g.vy=-22}
-function crash(e){if(g.shield){g.shield=0;A.sfx('hit');e.z=-9;boom();banner('Shield ne bacha liya!');return}g.dead=.9;boom();A.sfx('hit');if(navigator.vibrate)navigator.vibrate(120)}
+function swipe(d){if(g.st!=='play'||g.dead>0)return;if(navigator.vibrate)navigator.vibrate(12);if(d==='l')g.lane=Math.max(-1,g.lane-1);else if(d==='r')g.lane=Math.min(1,g.lane+1)}
+const COLLISION_LINES={
+ pole:['Bijli ka bill bhi hum dein?','Pole se poochho, load shedding kab khatam hogi!'],
+ pit:['Road hai ya swimming pool?','Sindh ki development ka naya chapter!','Gaddha nahi, surprise package hai!'],
+ barr:['Jiye Bhutto! Banner bhi saamne aa gaya!','Nara lagao, brake bachao!'],
+ wire:['Bijli gayi, gaari bhi gayi!','Wires ka network, road ka disconnect!'],
+ trans:['Bhai, coalition sambhalo!','Traffic ka alliance toot gaya!'],
+ severe:['Bas karo yaar, suspension ne resign kar diya!','Crash report: road jeet gayi!']
+};
+function crash(e){const kind=e&&e.k||'severe';const lines=COLLISION_LINES[kind]||COLLISION_LINES.severe;banner(lines[(Math.random()*lines.length)|0]);
+ if(g.shield){g.shield=0;A.sfx('hit');if(e)e.z=-9;boom();banner('Shield bach gaya — Jiye steering!');return}
+ g.dead=.9;boom();A.sfx('hit');if(navigator.vibrate)navigator.vibrate(120)}
 function upd(dt){
  for(let i=g.parts.length-1;i>=0;i--){const p=g.parts[i];p.l-=dt;p.vy+=900*dt;p.x+=p.vx*dt;p.y+=p.vy*dt;if(p.l<=0)g.parts.splice(i,1)}
  if(g.dead>0){g.dead-=dt;if(g.dead<=0)over();return}
@@ -84,12 +81,12 @@ function upd(dt){
   /* CollisionSystem */
   if(e.k==='coin'){g.coins+=e.v;g.score+=e.v*10*(g.dbl>0?2:1);A.sfx('coin');e.z=-9}
   else if(e.k==='pu'){applyPU(e.v);e.z=-9}
-  else if(e.k==='wire'){if(g.slide<=0)crash(e)}
-  else if(e.k==='barr'){if(g.py<1.05)crash(e)}
-  else if(e.k==='pit'){if(g.py<.3)crash(e)}
+  else if(e.k==='wire')crash(e)
+  else if(e.k==='barr')crash(e)
+  else if(e.k==='pit')crash(e)
   else crash(e)}
  for(const d of g.decor){d.z-=sp*dt;if(d.z<-4){d.z+=FAR;d.k=R()<.45?4:R()*4|0;d.v=R()*5|0}}
- g.msgT-=dt;if(g.msgT<=0){banner(MSG[R()*MSG.length|0]);g.msgT=14}}
+ /* Slogans are event-driven: no random ambient political catchphrases. */ }
 function applyPU(v){A.sfx('pow');if(v===0)g.shield=1;else if(v===1)g.mag=8;else if(v===2)g.dbl=10;else if(v===3)g.ej=1;else g.boost=5;banner(['Electricity Shield!','Pole Magnet!','Double Score!','Emergency Jump!','Development Boost!'][v])}
 
 /* ---------- Rendering ---------- */
@@ -193,7 +190,7 @@ function shop(){set('sc','🪙 '+S.d.coins);const w=$('chars');w.innerHTML='';
   d.appendChild(b);w.appendChild(d)})}
 let raf,last,lastTap=0;
 function frame(ts){if(g.st!=='play')return;const dt=Math.min(.05,(ts-last)/1000);last=ts;upd(dt);if(g.st==='play'){draw();hud();raf=requestAnimationFrame(frame)}}
-function start(){reset();g.st='play';document.body.classList.add('playing');show(null);A.init();A.play();last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame);banner(MSG[0])}
+function start(){reset();g.st='play';document.body.classList.add('playing');show(null);A.init();A.play();last=performance.now();cancelAnimationFrame(raf);raf=requestAnimationFrame(frame)}
 function pause(){if(g.st!=='play')return;g.st='pause';cancelAnimationFrame(raf);A.pause();show('pause')}
 function resume(){if(g.st!=='pause')return;g.st='play';show(null);A.play();last=performance.now();raf=requestAnimationFrame(frame)}
 function menu(){g.st='menu';cancelAnimationFrame(raf);document.body.classList.remove('playing');reset();
@@ -208,14 +205,15 @@ let pd=null;
 cv.addEventListener('pointerdown',e=>{A.init();A.play();pd={x:e.clientX,y:e.clientY,done:0};try{cv.setPointerCapture(e.pointerId)}catch(_){}});
 cv.addEventListener('pointermove',e=>{if(!pd||pd.done||g.st!=='play')return;const dx=e.clientX-pd.x,dy=e.clientY-pd.y;
  if(Math.hypot(dx,dy)>20){pd.done=1;swipe(Math.abs(dx)>Math.abs(dy)?(dx>0?'r':'l'):(dy>0?'d':'u'));pd.x=e.clientX;pd.y=e.clientY;pd.done=0;pd.moved=1}});
-cv.addEventListener('pointerup',()=>{if(pd&&!pd.done&&!pd.moved&&g.st==='play'){const n=performance.now();if(n-lastTap<320){jump();lastTap=0}else lastTap=n}pd=null});
+cv.addEventListener('pointerup',()=>{if(pd&&!pd.done&&!pd.moved&&g.st==='play'){/* tap has no jump action */}pd=null});
 cv.addEventListener('pointercancel',()=>pd=null);
-addEventListener('keydown',e=>{const m={ArrowLeft:'l',ArrowRight:'r',ArrowUp:'u',ArrowDown:'d',' ':'u'}[e.key];
+addEventListener('keydown',e=>{const m={ArrowLeft:'l',ArrowRight:'r',a:'l',d:'r'}[e.key];
  if(m){e.preventDefault();A.init();A.play();swipe(m)}else if(e.key==='Escape'||e.key==='p'){g.st==='play'?pause():resume()}});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){pause();if(A.ctx)A.ctx.suspend()}else if(A.ctx){A.ctx.resume();if(g.st==='menu')A.play()}});
 addEventListener('resize',rs);
 
 /* ---------- Wiring ---------- */
+$('leftControl').addEventListener('pointerdown',e=>{e.preventDefault();swipe('l')});$('rightControl').addEventListener('pointerdown',e=>{e.preventDefault();swipe('r')});
 $('play').onclick=start;$('retry').onclick=start;$('rt').onclick=start;$('rs').onclick=resume;$('bp').onclick=pause;$('share').onclick=share;
 $('mshop').onclick=()=>{shop();show('shop')};$('mset').onclick=()=>show('set');$('mcr').onclick=()=>show('cred');
 document.querySelectorAll('.back').forEach(b=>b.onclick=()=>show('menu'));document.querySelectorAll('.tomenu').forEach(b=>b.onclick=menu);
