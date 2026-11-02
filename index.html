@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Sindh Pole Runner</title><meta name="theme-color" content="#f59e0b">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="favicon.svg">
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png"><link rel="stylesheet" href="css/style.css"></head>
+<body>
+<canvas id="c"></canvas>
+<div id="hud"><div class="hl"><b id="hs">0</b><small id="hd">0 m</small></div><div id="hp"></div>
+<div class="hr"><span id="hc">🪙 0</span><button id="bp" aria-label="Pause">❚❚</button></div></div>
+<div id="banner"></div>
+<section id="menu" class="ov on"><div class="logo"><h1>SINDH<br>POLE RUNNER</h1><p>Road Bani, Pole Nahi Hata!</p></div>
+<div class="best">Best <b id="mb">0</b> &nbsp; 🪙 <b id="mc">0</b></div>
+<button class="big" id="play">PLAY</button>
+<div class="row"><button id="mshop">Garage (Cars)</button><button id="mset">Settings</button></div>
+<div class="row"><button class="tm"></button><button class="ts"></button></div>
+<div class="row"><button id="mcr">Credits</button><button id="inst" hidden>Install app</button></div>
+<small>Created by Qayyum Bhatti · build 4</small></section>
+<section id="pause" class="ov"><h2>Paused</h2><button class="big" id="rs">Resume</button>
+<div class="row"><button id="rt">Restart</button><button class="tomenu">Main menu</button></div>
+<div class="row"><button class="tm"></button><button class="ts"></button></div></section>
+<section id="over" class="ov"><h2 id="om"></h2>
+<div class="stats"><span>Score<b id="os">0</b></span><span>Best<b id="ob">0</b></span><span>Distance<b id="od">0</b></span><span>Coins<b id="oc">0</b></span></div>
+<button class="big" id="retry">Retry</button>
+<div class="row"><button class="tomenu">Main menu</button><button id="share">Share score</button></div></section>
+<section id="shop" class="ov"><h2>Garage (Cars)</h2><div id="sc">🪙 0</div><div id="chars"></div><button class="back">Back</button></section>
+<section id="set" class="ov"><h2>Settings</h2><button class="tm"></button><button class="ts"></button>
+<label>Music volume <input id="vol" type="range" min="0" max="1" step=".05"></label><button class="back">Back</button></section>
+<section id="cred" class="ov"><h2>Credits</h2><p>Sindh Pole Runner<br>Created by Qayyum Bhatti</p>
+<p class="sm">A fictional satirical game. Music is an original synthesized placeholder; drop your authorized track at assets/audio/music.mp3 to replace it.</p><button class="back">Back</button></section>
+<script src="js/music-data.js"></script><script src="js/main.js"></script></body></html>
