@@ -1,0 +1,30 @@
+name: Extract Sindh Pole Runner zip
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'sindh-pole-runner.zip'
+
+permissions:
+  contents: write
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unzip into repo root
+        run: |
+          unzip -q -o sindh-pole-runner.zip -d _tmp
+          cp -a _tmp/sindh-pole-runner/. .
+          rm -rf _tmp sindh-pole-runner.zip
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet || git commit -m "Extract Sindh Pole Runner to repo root"
+          git push
