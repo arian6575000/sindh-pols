@@ -1,6 +1,7 @@
 'use strict';
 /* SINDH POLE RUNNER — vanilla JS / Canvas 2D. Systems: Save, Audio, Perspective, Road, Player, Obstacles, Collisions, Collectibles, PowerUps, UI */
 const $=id=>document.getElementById(id),R=Math.random;
+{const sm=document.querySelector('#menu small');if(sm)sm.textContent='Created by Qayyum Bhatti · build 6 · js ok'}
 /* ---------- SaveManager ---------- */
 const S={d:{best:0,coins:0,dist:0,chars:[0],char:0,music:true,sfx:true,vol:.6},
  load(){try{Object.assign(this.d,JSON.parse(localStorage.getItem('spr1')||'{}'))}catch(e){}},
