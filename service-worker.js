@@ -1,4 +1,4 @@
-const V='spr-v6',F=['./','index.html','css/style.css?v=6','js/main.js?v=6','js/music-data.js?v=6','manifest.webmanifest','favicon.svg','assets/icons/icon-192.png','assets/icons/icon-512.png'];
+const V='spr-v7',F=['./','index.html','css/style.css?v=7','js/main.js?v=7','js/music-data.js?v=7','manifest.webmanifest','favicon.svg','assets/icons/icon-192.png','assets/icons/icon-512.png'];
 /* bypass HTTP cache on install so a stale file is never stored */
 self.addEventListener('install',e=>e.waitUntil(caches.open(V).then(c=>c.addAll(F.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V).map(x=>caches.delete(x)))).then(()=>self.clients.claim())));

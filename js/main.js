@@ -1,7 +1,7 @@
 'use strict';
 /* SINDH POLE RUNNER — vanilla JS / Canvas 2D. Systems: Save, Audio, Perspective, Road, Player, Obstacles, Collisions, Collectibles, PowerUps, UI */
 const $=id=>document.getElementById(id),R=Math.random;
-{const sm=document.querySelector('#menu small');if(sm)sm.textContent='Created by Qayyum Bhatti · build 6 · js ok'}
+{const sm=document.querySelector('#menu small');if(sm)sm.textContent='Created by Qayyum Bhatti · build 7 · js ok'}
 /* ---------- SaveManager ---------- */
 const S={d:{best:0,coins:0,dist:0,chars:[0],char:0,music:true,sfx:true,vol:.6},
  load(){try{Object.assign(this.d,JSON.parse(localStorage.getItem('spr1')||'{}'))}catch(e){}},
@@ -55,13 +55,14 @@ function reset(){g.parts.length=0;pool.push(...g.ents);g.ents.length=0;Object.as
 
 /* ---------- ObstacleManager (fair rows: a safe lane always exists, shifts max 1 lane per row) ---------- */
 function row(){const z=FAR,s=g.safe=Math.max(-1,Math.min(1,g.safe+(R()<.6?(R()<.5?-1:1):0)));
+ /* No jump/slide any more: obstacles NEVER touch lane s (the safe lane), so at least one of the 3 lanes is always free. */
  const oth=[-1,0,1].filter(l=>l!==s),r=R();
  if(r<.3){const l=oth[R()*2|0],tp=R()*4|0;add(tp===1?'trans':'pole',l,z,{tilt:tp===2?(R()<.5?-.12:.12):0});
   if(tp===3)add('barr',oth.find(x=>x!==l),z)}
  else if(r<.55){oth.forEach(l=>add('pole',l,z))}
- else if(r<.7){add(R()<.5?'trans':'pole',oth[R()*2|0],z);add('pit',[-1,0,1][R()*3|0],z+7)}
- else if(r<.85){add('wire',0,z,{all:1})}
- else{[-1,0,1].forEach(l=>{if(R()<.7)add('barr',l,z)})}
+ else if(r<.7){add(R()<.5?'trans':'pole',oth[R()*2|0],z);add('pit',oth[R()*2|0],z+4)}
+ else if(r<.85){const l=oth[R()*2|0];add('pit',l,z);add('pole',oth.find(x=>x!==l),z+3.5)}
+ else{oth.forEach(l=>{if(R()<.85)add('barr',l,z)})}
  if(R()<.75){const v=R()<.06?5:[1,1,2,3][R()*4|0];for(let i=0;i<5;i++)add('coin',s,z+i*2.4-4,{v})}
  if(R()<.07)add('pu',s,z+10,{v:R()*5|0})}
 
@@ -86,7 +87,7 @@ function upd(dt){
  g.px+=(g.lane-g.px)*Math.min(1,dt*14);
  if(g.py>0||g.vy>0){g.vy-=40*dt;g.py+=g.vy*dt;if(g.py<=0){g.py=0;g.vy=0}}
  g.slide=Math.max(0,g.slide-dt);g.mag=Math.max(0,g.mag-dt);g.dbl=Math.max(0,g.dbl-dt);g.boost=Math.max(0,g.boost-dt);
- g.gap-=sp*dt;if(g.gap<=0){row();g.gap=Math.max(13,22-g.t*.08)+R()*6}
+ g.gap-=sp*dt;if(g.gap<=0){row();g.gap=Math.max(15,22-g.t*.08)+R()*6}
  for(let i=g.ents.length-1;i>=0;i--){const e=g.ents[i];e.z-=sp*dt;
   if(e.k==='coin'&&g.mag>0&&e.z<22){e.lane+=(g.px-e.lane)*Math.min(1,dt*8);e.z-=sp*dt*.5}
   if(e.z<-4){pool.push(e);g.ents.splice(i,1);continue}
